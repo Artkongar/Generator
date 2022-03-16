@@ -6,6 +6,7 @@ from pylatex.utils import italic, NoEscape
 
 import random
 
+from utils.MultiprocessingExample import calculateTaskAnswerSync
 
 class Task:
     __taskDescription = None
@@ -81,8 +82,23 @@ class Ticket:
     __ticketTitle = None
     __ticketNumber = None
 
+    __calculateTimeout = 30
+    __calculateAttempts = 3
+
     def __init__(self):
         self.__taskArray = []
+
+    def setCalculateTimeout(self, value):
+        self.__calculateTimeout = value
+
+    def setCalculateAttempts(self, value):
+        self.__calculateAttempts = value
+
+    def getCalculateTimeout(self):
+        return self.__calculateTimeout
+
+    def getCalculateAttempts(self):
+        return self.__calculateAttempts
 
     def addTask(self, task):
         self.__taskArray.append(task)
@@ -96,18 +112,17 @@ class Ticket:
     def getAnswers(self):
         answers = None
         if (len(self.__taskArray) != 0):
-            answers = []
-        for task in self.__taskArray:
-            taskAnswer = task.getAnswerLatexText()
-            answers.append(taskAnswer)
+            answers = calculateTaskAnswerSync(self.__taskArray, self.__calculateTimeout, self.__calculateAttempts)
+
         return answers
 
     def getTicketLatex(self):
         tasks = self.getTasks()
         answers = self.getAnswers()
 
-        if (len(tasks) != len(tasks)):
-            raise Exception('Tasks and answers amount are not equal')
+        print(len(tasks),  len(answers))
+        #if (len(tasks) != len(answers)):
+        #    raise Exception('Tasks and answers amount are not equal')
 
         doc = Document()
         doc.packages.append(Package('fontenc', 'T2A'))
@@ -119,56 +134,13 @@ class Ticket:
         doc.preamble.append(Command('date', NoEscape(r'\today')))
         doc.append(NoEscape(r'\maketitle'))
 
-        for i in range(len(tasks)):
-            taskLatexQuery = tasks[i].getLatexQuery()
-            answerLatexQuery = answers[i]
-            with doc.create(Section(tasks[i].getTaskDescription() + ": ")):
-                doc.append(NoEscape("Задание: $ " + taskLatexQuery + " $"))
-                doc.append(NoEscape("\\" * 4))
-                doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
-        doc.generate_tex('ticket')
 
-ticket1 = Ticket()
-
-task1 = Task()
-task1.setTaskDescription("Решите интеграл")
-task1.setIntRangeValues(-10, 10)
-task1.setLatexTask(r"\int_{{?}}^{{?}} \frac{\exp(\frac{?}{x})dx}{x^{?}}")
-task1.setBindings(1, 2, 1, 2)
-
-task2 = Task()
-task2.setTaskDescription("Решите предел")
-task2.setIntRangeValues(-15, 15)
-task2.setLatexTask(r"""\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}""")
-task2.setBindings(-2, 1, 2, 1, -2, 1, 6, -2)
-
-ticket1.addTask(task1)
-ticket1.addTask(task2)
-
-answers = ticket1.getAnswers()
-print(answers)
-ticket1.getTicketLatex()
-
-
-'''
-class Generator:
-    __tasksArray = None
-
-    def __init__(self):
-        self.__tasksArray = []
-
-    def addTask(self, task):
-        self.__tasksArray.append(task)
-
-    def setTaskArray(self, tasks):
-        self.__tasksArray = tasks
-
-    def getTasksAnswers(self):
-        taskAnswers = None
-        for task in self.__tasksArray:
-            taskAnswer = task.getAnswerLatexText()
-            if (taskAnswers == None):
-                taskAnswers = []
-            taskAnswers.append(taskAnswer)
-        return taskAnswers
-'''
+        #for i in range(len(tasks)):
+        #    taskLatexQuery = tasks[i].getLatexQuery()
+        #    answerLatexQuery = answers[str(i)]
+        #    print(answerLatexQuery)
+        #    with doc.create(Section(tasks[i].getTaskDescription() + ": ")):
+        #        doc.append(NoEscape("Задание: $ " + taskLatexQuery + " $"))
+        #        doc.append(NoEscape("\\" * 4))
+        #        doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
+        #doc.generate_tex('ticket')
