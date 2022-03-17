@@ -120,9 +120,8 @@ class Ticket:
         tasks = self.getTasks()
         answers = self.getAnswers()
 
-        print(len(tasks),  len(answers))
-        #if (len(tasks) != len(answers)):
-        #    raise Exception('Tasks and answers amount are not equal')
+        if (len(tasks) != len(answers)):
+            raise Exception('Tasks and answers amount are not equal')
 
         doc = Document()
         doc.packages.append(Package('fontenc', 'T2A'))
@@ -135,12 +134,12 @@ class Ticket:
         doc.append(NoEscape(r'\maketitle'))
 
 
-        #for i in range(len(tasks)):
-        #    taskLatexQuery = tasks[i].getLatexQuery()
-        #    answerLatexQuery = answers[str(i)]
-        #    print(answerLatexQuery)
-        #    with doc.create(Section(tasks[i].getTaskDescription() + ": ")):
-        #        doc.append(NoEscape("Задание: $ " + taskLatexQuery + " $"))
-        #        doc.append(NoEscape("\\" * 4))
-        #        doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
-        #doc.generate_tex('ticket')
+        for i in range(len(tasks)):
+            taskLatexQuery = tasks[i].getLatexQuery()
+            answerLatexQuery = answers[str(i)]
+            print(answerLatexQuery)
+            with doc.create(Section(tasks[i].getTaskDescription() + ": ")):
+                doc.append(NoEscape("Задание: $ " + taskLatexQuery + " $"))
+                doc.append(NoEscape("\\" * 4))
+                doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
+        doc.generate_tex('ticket')

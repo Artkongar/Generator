@@ -13,15 +13,15 @@ def calculateTaskAnswerSync(taskArray, timeout, attempts):
 
     manager = multiprocessing.Manager()
     return_dict = manager.dict()
+    processInd = [str(i) for i in range(len(taskArray))]
     for att in range(attempts):
         if (notDoneCounter == 0):
             break
         else:
             processes = []
             for i in range(notDoneCounter):
-                p = multiprocessing.Process(target=resolver, args=(taskArray[i], return_dict),
-                                            name=(str(i)))
-                print('process_' + str(i + 1))
+                p = multiprocessing.Process(target=resolver, args=(taskArray[i], return_dict), name=(processInd[i]))
+                print('process_' + str(processInd[i]))
                 processes.append(p)
             for process in processes:
                 process.start()
@@ -40,7 +40,9 @@ def calculateTaskAnswerSync(taskArray, timeout, attempts):
                 if isAliveList[j]:
                     processes[j].terminate()
                 else:
+                    processInd.remove(processes[j].name)
                     notDoneCounter -= 1
             for proc in processes:
                 proc.join()
+            print(f'dict_len = {return_dict}')
     return return_dict

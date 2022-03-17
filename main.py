@@ -15,13 +15,13 @@ if __name__ == '__main__':
     task2.setLatexTask(r"""\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}""")
     #task2.setBindings(-2, 1, 2, 1, -2, 1, 6, -2)
 
-    for i in range(5):
+    for i in range(30):
         ticket1.addTask(task1)
         ticket1.addTask(task2)
 
     ticket1.setCalculateAttempts(10)
     ticket1.setCalculateTimeout(15)
 
-    answers = ticket1.getAnswers()
-    print(len(answers))
-    #ticket1.getTicketLatex()
+    #answers = ticket1.getAnswers()
+    #print(len(answers))
+    ticket1.getTicketLatex()
