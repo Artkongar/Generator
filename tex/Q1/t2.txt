@@ -1,2 +1,12 @@
-\int_{{?}}^{{?}} \arccos{?x} dx
--0.5, 0.5, 1
+<begin description>
+Задание 1
+<end description>
+
+<begin problem>
+Решите пример: <begin formula>\int_{{?}}^{{?}} \arccos{?x} dx<end formula>
+Ответы запишите в бланк
+<end problem>
+
+<begin solution>
+
+<end solution>

@@ -1,2 +1,12 @@
-\int_{?}^{?} (?+?x-?x^?)dx
--2, 4, 8, 2, 1, 2
+<begin description>
+Задание 1
+<end description>
+
+<begin problem>
+Решите пример: <begin formula>\int_{?}^{?} (?+?x-?x^?)dx<end formula>
+Ответы запишите в бланк
+<end problem>
+
+<begin solution>
+
+<end solution>

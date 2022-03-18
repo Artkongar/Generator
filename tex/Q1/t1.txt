@@ -1,2 +1,12 @@
-\int_{{?}}^{{?}} \frac{\exp(\frac{?}{x})dx}{x^{?}}
-1, 2, 1, 2
+<begin description>
+Задание 1
+<end description>
+
+<begin problem>
+Решите пример: <begin formula>\int_{{?}}^{{?}} \frac{\exp(\frac{?}{x})dx}{x^{?}}<end formula>
+Ответы запишите в бланк
+<end problem>
+
+<begin solution>
+
+<end solution>

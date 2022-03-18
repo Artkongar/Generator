@@ -1,2 +1,12 @@
-\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}
--2, 1, 2, 1, -2, 1, 6, -2
+<begin description>
+Задание 2
+<end description>
+
+<begin problem>
+Решите пример: <begin formula>\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}<end formula>
+Ответы запишите в бланк
+<end problem>
+
+<begin solution>
+
+<end solution>

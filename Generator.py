@@ -5,6 +5,8 @@ from pylatex import Document, Section, Subsection, Command, Package
 from pylatex.utils import italic, NoEscape
 
 import random
+import os
+import re
 
 
 class Task:
@@ -128,6 +130,49 @@ class Ticket:
                 doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
         doc.generate_tex('ticket')
 
+
+class Generator:
+
+    def parseTickets(self):
+        filePath = os.path.join(os.getcwd(), 'tex')
+        files = os.listdir(filePath)
+        selectedFiles = []
+        for path in [path for path in files if path != "packages.txt"]:
+            taskFilePath = os.path.join(filePath, path)
+            taskFiles = os.listdir(taskFilePath)
+
+            selectedTaskFileName = os.path.join(taskFilePath, random.choice(taskFiles))
+            selectedFiles.append(selectedTaskFileName)
+
+        t = Ticket()
+        for i in selectedFiles:
+            f = open(i, encoding="utf-8")
+            ticketData = f.read()
+            f.close()
+
+            task = task()
+
+            description = re.findall('<begin description>([\s\S]*?)<end description>', ticketData)[0].replace("\n", "")
+            problem = re.findall(r'<begin problem>([\s\S]*?)<end problem>', ticketData)[0].replace("\n", "")
+            formuls = re.findall(r'<begin formula>([\s\S]*?)<end formula', problem)
+
+
+            task.setTaskDescription(description)
+            task.setIntRangeValues(-10, 10)
+            task.setLatexTask(formuls)
+
+
+
+
+            print(problem)
+            print(formuls)
+
+
+g = Generator()
+
+g.parseTickets()
+
+'''
 ticket1 = Ticket()
 
 task1 = Task()
@@ -145,30 +190,7 @@ task2.setBindings(-2, 1, 2, 1, -2, 1, 6, -2)
 ticket1.addTask(task1)
 ticket1.addTask(task2)
 
-answers = ticket1.getAnswers()
-print(answers)
+# answers = ticket1.getAnswers()
+# print(answers)
 ticket1.getTicketLatex()
-
-
-'''
-class Generator:
-    __tasksArray = None
-
-    def __init__(self):
-        self.__tasksArray = []
-
-    def addTask(self, task):
-        self.__tasksArray.append(task)
-
-    def setTaskArray(self, tasks):
-        self.__tasksArray = tasks
-
-    def getTasksAnswers(self):
-        taskAnswers = None
-        for task in self.__tasksArray:
-            taskAnswer = task.getAnswerLatexText()
-            if (taskAnswers == None):
-                taskAnswers = []
-            taskAnswers.append(taskAnswer)
-        return taskAnswers
 '''

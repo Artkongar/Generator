@@ -1,2 +1,12 @@
-\lim_{x \to {?}} \frac{\sqrt{?x+?}?\sqrt{?x+?}}{?x+?}
-3, 1, 6, -1, 10, -21, 5, -15
+<begin description>
+Задание 2
+<end description>
+
+<begin problem>
+Решите пример: <begin formula>\lim_{x \to {?}} \frac{\sqrt{?x+?}?\sqrt{?x+?}}{?x+?}<end formula>
+Ответы запишите в бланк
+<end problem>
+
+<begin solution>
+
+<end solution>
