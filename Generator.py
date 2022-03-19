@@ -83,6 +83,18 @@ class Ticket:
     __ticketTitle = None
     __ticketNumber = None
 
+    def setTicketTitle(self, title):
+        self.__ticketTitle = title
+
+    def setTicketNumber(self, value):
+        self.__ticketNumber = value
+
+    def getTicketNumber(self):
+        return self.__ticketNumber
+
+    def getTicketTitle(self):
+        return self.__ticketTitle
+
     def __init__(self):
         self.__taskArray = []
 
@@ -104,7 +116,7 @@ class Ticket:
             answers.append(taskAnswer)
         return answers
 
-    def getTicketLatex(self):
+    def getTicketLatex(self, fileName):
         tasks = self.getTasks()
         answers = self.getAnswers()
 
@@ -116,8 +128,8 @@ class Ticket:
         doc.packages.append(Package('lingmacros'))
         doc.packages.append(Package('amsmath'))
 
-        doc.preamble.append(Command('title', 'Awesome Title'))
-        doc.preamble.append(Command('author', 'Anonymous author'))
+        doc.preamble.append(Command('title', self.__ticketTitle))
+        doc.preamble.append(Command('author', self.__ticketNumber))
         doc.preamble.append(Command('date', NoEscape(r'\today')))
         doc.append(NoEscape(r'\maketitle'))
 
@@ -128,7 +140,82 @@ class Ticket:
                 doc.append(NoEscape("Задание: $ " + taskLatexQuery + " $"))
                 doc.append(NoEscape("\\" * 4))
                 doc.append(NoEscape("Ответ: $ " + answerLatexQuery + " $"))
-        doc.generate_tex('ticket')
+        doc.generate_tex(fileName)
+
+
+class Generator:
+
+    def parseTickets(self, n):
+        filePath = os.path.join(os.getcwd(), 'tex')
+        files = os.listdir(filePath)
+
+        selectedFiles = []
+        for j in range(n):
+            oneTicketFiles = []
+            for path in [path for path in files if path != "packages.txt"]:
+                taskFilePath = os.path.join(filePath, path)
+                taskFiles = os.listdir(taskFilePath)
+
+                selectedTaskFileName = os.path.join(taskFilePath, random.choice(taskFiles))
+                oneTicketFiles.append(selectedTaskFileName)
+            selectedFiles.append(oneTicketFiles)
+
+        fileNameIndex = 0
+        for oneTicketFiles in selectedFiles:
+            t = Ticket()
+            t.setTicketTitle("Экзамен по математике")
+            t.setTicketNumber("Билет № " + str(fileNameIndex + 1))
+            for i in oneTicketFiles:
+                f = open(i, encoding="utf-8")
+                ticketData = f.read()
+                f.close()
+
+                task = Task()
+
+                description = re.findall('<begin description>([\s\S]*?)<end description>', ticketData)[0].replace("\n",
+                                                                                                                  "")
+                problem = re.findall(r'<begin problem>([\s\S]*?)<end problem>', ticketData)[0].replace("\n", "")
+                formuls = re.findall(r'<begin formula>([\s\S]*?)<end formula', problem)
+
+                task.setTaskDescription(description)
+                task.setIntRangeValues(-10, 10)
+                task.setLatexTask(formuls[0])
+
+                t.addTask(task)
+            fileNameIndex += 1
+            texFileName = "ticket_" + str(fileNameIndex)
+            t.getTicketLatex(texFileName)
+
+            answersPath = os.path.join(os.getcwd(), 'answers', texFileName + ".tex")
+            createdFilePath = os.path.join(os.getcwd(), texFileName + ".tex")
+            os.replace(createdFilePath, answersPath)
+
+
+g = Generator()
+g.parseTickets(3)
+
+'''
+ticket1 = Ticket()
+
+task1 = Task()
+task1.setTaskDescription("Решите интеграл")
+task1.setIntRangeValues(-10, 10)
+task1.setLatexTask(r"\int_{{?}}^{{?}} \frac{\exp(\frac{?}{x})dx}{x^{?}}")
+task1.setBindings(1, 2, 1, 2)
+
+task2 = Task()
+task2.setTaskDescription("Решите предел")
+task2.setIntRangeValues(-15, 15)
+task2.setLatexTask(r"""\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}""")
+task2.setBindings(-2, 1, 2, 1, -2, 1, 6, -2)
+
+ticket1.addTask(task1)
+ticket1.addTask(task2)
+
+# answers = ticket1.getAnswers()
+# print(answers)
+ticket1.getTicketLatex()
+'''
 
 
 class Generator:
@@ -150,26 +237,20 @@ class Generator:
             ticketData = f.read()
             f.close()
 
-            task = task()
+            task = Task()
 
             description = re.findall('<begin description>([\s\S]*?)<end description>', ticketData)[0].replace("\n", "")
             problem = re.findall(r'<begin problem>([\s\S]*?)<end problem>', ticketData)[0].replace("\n", "")
             formuls = re.findall(r'<begin formula>([\s\S]*?)<end formula', problem)
 
-
             task.setTaskDescription(description)
             task.setIntRangeValues(-10, 10)
             task.setLatexTask(formuls)
 
-
-
-
-            print(problem)
-            print(formuls)
+        t.getTicketLatex("ticket_" + str(0))
 
 
 g = Generator()
-
 g.parseTickets()
 
 '''
