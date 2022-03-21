@@ -1,2 +1,2 @@
-\int_{{?}}^{{?}} \frac{\exp(\frac{?}{x})dx}{x^{?}}
+\int_{1}^{2} \frac{\exp(\frac{1}{x})dx}{x^{2}}
 1, 2, 1, 2
