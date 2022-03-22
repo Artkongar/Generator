@@ -1,21 +1,13 @@
 from abc import abstractmethod, ABC
 
 from sympy import *
-from sympy.abc import x
-from sympy.parsing.latex import *
+
+from pylatex import Document, Section, Command, Package
+from pylatex.utils import NoEscape
 
 import os
 import re
 import random
-
-query = r"\int_{1}^{2} \frac{\exp(\frac{1}{x})dx}{x^{2}}"
-q = parse_latex(query)
-
-
-def get1():
-    expression = Integral(exp(1 / x) / x ** 2, (x, 1, 2))
-    result = expression.doit()
-    return result
 
 
 class Parameterizer(ABC):
@@ -39,41 +31,99 @@ class Parameterizer(ABC):
                 raise Exception("Not all variables are bound")
 
         for variable, value in calculatedVariables.items():
-            self.__expression = self.__expression.replace(f"<{variable}>", str(value))
-
-        return self.__expression, answer
+            self.__expression = self.__expression.replace(f"<{variable}>", "{" + str(value) + "}")
+        return self.__expression, latex(answer)
 
     @abstractmethod
     def solveExpression(self):
         pass
 
 
-class TestParameterizer1(Parameterizer):
+class Generator:
+    __solver = {}
 
-    def solveExpression(self):
-        v_a = 1  # random.randint(1, 10)
-        v_b = 2  # random.randint(1, 10)
-        v_c = 1  # random.randint(1, 10)
-        v_d = 2  # random.randint(1, 10)
+    def __init__(self, solver):
+        self.__solver = solver
 
-        v1 = exp(v_c / x)
-        v2 = x ** v_d
-        v3 = Integral(v1 / v2, (x, v_a, v_b)).doit()
+    def addSolver(self, taskType, solver):
+        self.__solver[taskType] = solver
 
-        variableBinding = {
-            "a": v_a,
-            "b": v_b,
-            "c": v_c,
-            "d": v_d
-        }
+    def getSolver(self):
+        return self.__solver
 
-        return [variableBinding, v3]
+    def selectFiles(self):
+        mainPath = os.getcwd()
+        taskPath = os.path.join(mainPath, "tex")
 
-p = TestParameterizer1()
-p.setExpression(r"\int_{<a>}^{<b>} \frac{\exp(\frac{<c>}{x})dx}{x^{<d>}}")
-result = p.parametrizeExpression()
-print(result)
+        taskTypesPath = [os.path.join(taskPath, i) for i in os.listdir(taskPath) if i != "packages.txt"]
+        ticketFiles = []
+        for taskType in taskTypesPath:
+            files = [os.path.join(taskType, file) for file in os.listdir(taskType)]
+            selectedTaskType = random.choice(files)
+            ticketFiles.append(selectedTaskType)
+        return ticketFiles
 
+    def getProblemSolution(self, ticketFiles):
+        problemAndSolution = []
+        for file in ticketFiles:
+            solver = file.split(os.sep)[-2]
+            f = open(file, encoding="utf-8")
+            text = f.read()
+            f.close()
 
+            problem = re.findall(r"\\begin\{problem\*}([\s\S]*?)\\end\{problem\*}", text)
+            if (len(problem) != 1):
+                raise Exception('Ticket does not contain only 1 problem')
+            solution = re.findall(r"\\begin\{solution\*}([\s\S]*?)\\end\{solution\*}", text)
+            if (len(solution) != 1):
+                raise Exception('Ticket does not contain only 1 solution')
+            problem, solution = problem[0].replace("\n", ""), solution[0].replace("\n", "")
+            formula = re.findall(r"\$([\s\S]*?)\$", problem)
+            if (len(formula) != 1):
+                raise Exception('Problem does not contain only 1 formula')
+            else:
+                solverInstance = self.__solver[solver]()
+                solverInstance.setExpression(formula[0])
+                parametrizedFormula = solverInstance.parametrizeExpression()
+                formula = parametrizedFormula[0]
+                problem = re.sub(r"\$([\s\S]*?)\$", "$" + formula.replace("\\", "\\\\") + "$", problem)
+                if (solution == ""):
+                    solution = "$" + parametrizedFormula[1] + "$"
 
+            problem = r"\begin{problem*}" + "\n" + str(problem) + "\n" + r"\end{problem*}"
+            solution = r"\begin{solution*}" + "\n" + str(solution) + "\n" + r"\end{solution*}"
+            problemAndSolution.append([problem, solution, formula])
+
+        return problemAndSolution
+
+    def createTickets(self, n):
+        k = 0
+        for i in range(n):
+            k += 1
+            selectedFiles = self.selectFiles()
+            problemsAndSolutions = self.getProblemSolution(selectedFiles)
+
+            doc = Document()
+            doc.packages.append(Package('fontenc', 'T2A'))
+            doc.packages.append(Package('lingmacros'))
+            doc.packages.append(Package('amsmath'))
+            doc.packages.append(Package('amsthm'))
+            doc.packages.append(NoEscape(r'\newtheorem*{problem*}{Problem}'))
+            doc.packages.append(NoEscape(r'\newtheorem*{solution*}{Solution}'))
+
+            doc.preamble.append(Command('title', 'Awesome Title'))
+            doc.preamble.append(Command('author', 'Anonymous author'))
+            doc.preamble.append(Command('date', NoEscape(r'\today')))
+            doc.append(NoEscape(r'\maketitle'))
+
+            for task in problemsAndSolutions:
+                problem = task[0]
+                solution = task[1]
+                formula = task[2]
+                with doc.create(Section("Задание " + str(k))):
+                    doc.append(NoEscape(problem))
+                    doc.append(NoEscape(solution))
+            texAnswerFileName = 'ticket' + str(k)
+            doc.generate_tex(texAnswerFileName)
+            os.replace(os.path.join(os.getcwd(), texAnswerFileName + ".tex"), os.path.join(os.getcwd(), "answers", texAnswerFileName + ".tex"))
 

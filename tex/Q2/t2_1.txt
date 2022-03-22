@@ -1,2 +1,8 @@
-\lim_{x \to ?} \frac{?x^{?}+?x+?}{\sqrt{?x + ?} +?}
--2, 1, 2, 1, -2, 1, 6, -2
+\begin{problem*}
+Решите предел: [test text] \\
+Задание: $ \lim_{x \to {<a>}} \frac{x^{<b>}+<c>x+<d>}{\sqrt{x + <e>} <f>} $%
+\end{problem*}
+
+\begin{solution*}
+
+\end{solution*}

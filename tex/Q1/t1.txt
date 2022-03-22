@@ -1,2 +1,8 @@
-\int_{1}^{2} \frac{\exp(\frac{1}{x})dx}{x^{2}}
-1, 2, 1, 2
+\begin{document}
+
+\begin{problem*}Решите интеграл: [test text] \\Задание: $ \int_{<a>}^{<b>} \frac{\exp(\frac{<c>}{x})dx}{x^{<d>}} $\end{problem*}
+
+\begin{solution*}
+\end{solution*}
+
+\end{document}
