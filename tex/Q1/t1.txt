@@ -1,8 +1,0 @@
-\begin{document}
-
-\begin{problem*}Решите интеграл: [test text] \\Задание: $ \int_{<a>}^{<b>} \frac{\exp(\frac{<c>}{x})dx}{x^{<d>}} $\end{problem*}
-
-\begin{solution*}
-\end{solution*}
-
-\end{document}

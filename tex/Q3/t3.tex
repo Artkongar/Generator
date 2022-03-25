@@ -1,0 +1,53 @@
+\documentclass{article}%
+\usepackage[T1]{fontenc}%
+\usepackage[utf8]{inputenc}%
+\usepackage{lmodern}%
+\usepackage{textcomp}%
+\usepackage{lastpage}%
+\usepackage[T2A]{fontenc}%
+\usepackage{lingmacros}%
+\usepackage{amsmath}%
+\usepackage{amsthm}%
+\newtheorem*{problem*}{Problem}%
+\newtheorem*{solution*}{Solution}%
+
+\begin{document}
+
+\begin{problem*}
+Случайные величины $X$ и $Y$ независимы и имеют равномерное
+распределение на отрезке $[<a>;<b>]$. Для случайной величины $Z=X+Y$ найдите:
+1) функцию распределения $F_Z(x)$;
+2) плотность распределения $f_Z(x)$ и постройте график плотности;
+3) значение $F_Z(<c>)$.
+\end{problem*}
+
+\begin{solution*}
+Ответы
+1) Функция распределения $F_Z(x)$ имеет вид:
+$
+F_Z(x)=\left\{
+\begin{array}{l}
+0, x\leqslant <Q0>;\\
+<Q3>, <Q0>\leqslant x\leqslant <Q1>;\\
+<Q4>, <Q1>\leqslant x\leqslant <Q2>;\\
+1, x\geqslant <Q2>;
+\end{array}.
+\right.
+$
+2) Плотность распределения $f_Z(x)$ имеет вид:
+$
+f_Z(x)=\left\{
+\begin{array}{l}
+<Q5>, <Q0>\leqslant x\leqslant <Q1>;\\
+<Q6>, <Q1>\leqslant x\leqslant <Q2>;\\
+0, x\not\in [<Q0>;<Q2>];
+\end{array}.
+\right.
+$
+3) Значение функции равно:
+$
+F_Z(<c>)=<QC>.
+$
+\end{solution*}
+
+\end{document}

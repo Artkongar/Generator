@@ -24,15 +24,16 @@ class Parameterizer(ABC):
             raise Exception('Expression was not set')
 
         variables = re.findall(r'<([\s\S]*?)>', self.__expression)
-        calculatedVariables, answer = self.solveExpression()
+        calculatedVariables = self.solveExpression()
 
         for variable in variables:
             if (variable not in calculatedVariables):
                 raise Exception("Not all variables are bound")
 
         for variable, value in calculatedVariables.items():
-            self.__expression = self.__expression.replace(f"<{variable}>", "{" + str(value) + "}")
-        return self.__expression, latex(answer)
+            self.__expression = self.__expression.replace(f"<{variable}>", "{" + latex(value) + "}")
+
+        return self.__expression
 
     @abstractmethod
     def solveExpression(self):
@@ -71,28 +72,21 @@ class Generator:
             text = f.read()
             f.close()
 
-            problem = re.findall(r"\\begin\{problem\*}([\s\S]*?)\\end\{problem\*}", text)
+            solverInstance = self.__solver[solver]()
+            solverInstance.setExpression(text)
+            parametrizedText = solverInstance.parametrizeExpression()
+
+            problem = re.findall(r"\\begin\{problem\*}([\s\S]*?)\\end\{problem\*}", parametrizedText)
             if (len(problem) != 1):
                 raise Exception('Ticket does not contain only 1 problem')
-            solution = re.findall(r"\\begin\{solution\*}([\s\S]*?)\\end\{solution\*}", text)
+            solution = re.findall(r"\\begin\{solution\*}([\s\S]*?)\\end\{solution\*}", parametrizedText)
             if (len(solution) != 1):
                 raise Exception('Ticket does not contain only 1 solution')
-            problem, solution = problem[0].replace("\n", ""), solution[0].replace("\n", "")
-            formula = re.findall(r"\$([\s\S]*?)\$", problem)
-            if (len(formula) != 1):
-                raise Exception('Problem does not contain only 1 formula')
-            else:
-                solverInstance = self.__solver[solver]()
-                solverInstance.setExpression(formula[0])
-                parametrizedFormula = solverInstance.parametrizeExpression()
-                formula = parametrizedFormula[0]
-                problem = re.sub(r"\$([\s\S]*?)\$", "$" + formula.replace("\\", "\\\\") + "$", problem)
-                if (solution == ""):
-                    solution = "$" + parametrizedFormula[1] + "$"
+            problem, solution = problem[0], solution[0]
 
             problem = r"\begin{problem*}" + "\n" + str(problem) + "\n" + r"\end{problem*}"
             solution = r"\begin{solution*}" + "\n" + str(solution) + "\n" + r"\end{solution*}"
-            problemAndSolution.append([problem, solution, formula])
+            problemAndSolution.append([problem, solution])
 
         return problemAndSolution
 
@@ -108,6 +102,7 @@ class Generator:
             doc.packages.append(Package('lingmacros'))
             doc.packages.append(Package('amsmath'))
             doc.packages.append(Package('amsthm'))
+            doc.packages.append(Package('amssymb'))
             doc.packages.append(NoEscape(r'\newtheorem*{problem*}{Problem}'))
             doc.packages.append(NoEscape(r'\newtheorem*{solution*}{Solution}'))
 
@@ -119,8 +114,7 @@ class Generator:
             for task in problemsAndSolutions:
                 problem = task[0]
                 solution = task[1]
-                formula = task[2]
-                with doc.create(Section("Задание " + str(k))):
+                with doc.create(Section("Задание ")):
                     doc.append(NoEscape(problem))
                     doc.append(NoEscape(solution))
             texAnswerFileName = 'ticket' + str(k)
