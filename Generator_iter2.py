@@ -56,7 +56,7 @@ class Generator:
         mainPath = os.getcwd()
         taskPath = os.path.join(mainPath, "tex")
 
-        taskTypesPath = [os.path.join(taskPath, i) for i in os.listdir(taskPath) if i != "packages.txt"]
+        taskTypesPath = [os.path.join(taskPath, i) for i in os.listdir(taskPath) if i != "packages.tex"]
         ticketFiles = []
         for taskType in taskTypesPath:
             files = [os.path.join(taskType, file) for file in os.listdir(taskType)]
@@ -90,34 +90,67 @@ class Generator:
 
         return problemAndSolution
 
+    def __createDocTitle(self):
+        doc = Document()
+
+        doc.packages.append(NoEscape(r"\usepackage{amsthm}%"))
+        doc.packages.append(NoEscape(r"\usepackage{amssymb}%"))
+        doc.packages.append(NoEscape(r"\newtheorem*{solution*}{Solution}%"))
+        doc.packages.append(NoEscape(r"\newtheorem*{problem*}{Problem}%"))
+
+        packageFile = open(os.path.join(os.getcwd(), "tex", "packages.tex"), encoding="utf-8")
+        doc.packages.append(NoEscape(packageFile.read()))
+        packageFile.close()
+        doc.packages.append(NoEscape(r"\usepackage[T2A]{fontenc}%"))
+
+        doc.preamble.append(Command('title', 'Awesome Title'))
+        doc.preamble.append(Command('author', 'Anonymous author'))
+        doc.preamble.append(Command('date', NoEscape(r'\today')))
+        doc.append(NoEscape(r'\maketitle'))
+
+        return doc
+
+    def __addDocContent(self, doc, problemsAndSolutions, withAnswers=False):
+        for task in problemsAndSolutions:
+            problem = task[0]
+            solution = task[1]
+            with doc.create(Section("Задание ")):
+                doc.append(NoEscape(problem))
+                if (withAnswers):
+                    doc.append(NoEscape(solution))
+        return doc
+
     def createTickets(self, n):
+        if "answers" not in os.listdir(os.getcwd()):
+            os.mkdir(os.path.join(os.getcwd(), 'answers'))
+            os.mkdir(os.path.join(os.getcwd(), 'answers', 'tasks'))
+            os.mkdir(os.path.join(os.getcwd(), 'answers', 'answers'))
+        else:
+            if ("tasks" not in os.listdir(os.path.join(os.getcwd(), 'answers'))):
+                os.mkdir(os.path.join(os.getcwd(), 'answers', 'tasks'))
+            if ("answers" not in os.listdir(os.path.join(os.getcwd(), 'answers'))):
+                os.mkdir(os.path.join(os.getcwd(), 'answers', 'answers'))
+
         k = 0
         for i in range(n):
             k += 1
             selectedFiles = self.selectFiles()
             problemsAndSolutions = self.getProblemSolution(selectedFiles)
 
-            doc = Document()
-            doc.packages.append(Package('fontenc', 'T2A'))
-            doc.packages.append(Package('lingmacros'))
-            doc.packages.append(Package('amsmath'))
-            doc.packages.append(Package('amsthm'))
-            doc.packages.append(Package('amssymb'))
-            doc.packages.append(NoEscape(r'\newtheorem*{problem*}{Problem}'))
-            doc.packages.append(NoEscape(r'\newtheorem*{solution*}{Solution}'))
+            docWithAnswers, = self.__addDocContent(self.__createDocTitle(), problemsAndSolutions, True),
+            doc = self.__addDocContent(self.__createDocTitle(), problemsAndSolutions)
 
-            doc.preamble.append(Command('title', 'Awesome Title'))
-            doc.preamble.append(Command('author', 'Anonymous author'))
-            doc.preamble.append(Command('date', NoEscape(r'\today')))
-            doc.append(NoEscape(r'\maketitle'))
+            texFileAnsPostfix = "_answers"
+            texFileName = 'ticket' + str(k)
 
-            for task in problemsAndSolutions:
-                problem = task[0]
-                solution = task[1]
-                with doc.create(Section("Задание ")):
-                    doc.append(NoEscape(problem))
-                    doc.append(NoEscape(solution))
-            texAnswerFileName = 'ticket' + str(k)
-            doc.generate_tex(texAnswerFileName)
-            os.replace(os.path.join(os.getcwd(), texAnswerFileName + ".tex"), os.path.join(os.getcwd(), "answers", texAnswerFileName + ".tex"))
+            docWithAnswers.generate_tex(texFileName + texFileAnsPostfix)
+            doc.generate_tex(texFileName)
 
+            os.replace(
+                os.path.join(os.getcwd(), texFileName + texFileAnsPostfix + ".tex"),
+                os.path.join(os.getcwd(), "answers", "answers", texFileName + texFileAnsPostfix + ".tex")
+            )
+            os.replace(
+                os.path.join(os.getcwd(), texFileName + ".tex"),
+                os.path.join(os.getcwd(), "answers", "tasks", texFileName + ".tex")
+            )
