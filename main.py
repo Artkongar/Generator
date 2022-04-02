@@ -12,4 +12,4 @@ solvers = {
     "t3_4": TestParameterizer3_4
 }
 g = Generator(solvers)
-g.createTickets(10)
+g.createTickets(10, True)

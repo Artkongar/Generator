@@ -6,6 +6,7 @@ from pylatex import Document
 from pylatex.utils import NoEscape
 
 import os
+import shutil
 import re
 import random
 import json
@@ -82,9 +83,10 @@ class Generator:
             ticketFiles.append(selectedTaskType)
         return ticketFiles
 
-    def getProblemSolution(self, ticketFiles):
+    def __getProblemSolution(self, ticketFiles, html, counter):
         print([i.split("\\")[-1] for i in ticketFiles])
         problemAndSolution = []
+        problemsForHtml = None
         for file in ticketFiles:
             solver = file.split(os.sep)[-1].split(".")[0]
             taskType = file.split(os.sep)[-2]
@@ -106,13 +108,66 @@ class Generator:
             if (len(solution) != 1):
                 raise Exception('Ticket does not contain only 1 solution')
             problem, solution = problem[0], solution[0]
+            if (html):
+                if (problemsForHtml == None):
+                    problemsForHtml = {}
+                problemsForHtml[taskType] = problem
+
             if (taskType not in self.__taskWeight):
                 raise Exception("Not all types set in 'taskWeight.json'")
-            problem = r"\begin{problem}[" + str(self.__taskWeight[taskType]) + " баллов]\n" + str(problem) + "\n" + r"\end{problem}"
+            problem = r"\begin{problem}[" + str(self.__taskWeight[taskType]) + " баллов]\n" + str(
+                problem) + "\n" + r"\end{problem}"
             solution = r"\begin{solution*}" + "\n" + str(solution) + "\n" + r"\end{solution*}"
             problemAndSolution.append([problem, solution])
 
+        if (html):
+            self.__createHtmlTicket(problemsForHtml, counter)
         return problemAndSolution
+
+    def __createHtmlTicket(self, problems, counter):
+        htmlTemplatePath = os.path.join(os.getcwd(), "html", "utils")
+        htmlTemplateFile = os.path.join(htmlTemplatePath, "html_template.html")
+
+        htmlTicketFile = os.path.join(htmlTemplatePath, "ticket" + str(counter) + ".html")
+        shutil.copyfile(htmlTemplateFile, htmlTicketFile)
+
+        f = open(htmlTicketFile, "a", encoding="utf-8")
+        f.write(r"""<h5>Билет """ + str(counter) + r"""</h5><div id="content">""")
+        taskCounter = 0
+        for taskType, content in problems.items():
+            taskCounter += 1
+            newContent = ""
+            isOpen = False
+            for word in content:
+                if (word == "$"):
+                    if (isOpen == False):
+                        newContent += "\("
+                        isOpen = True
+                    else:
+                        newContent += "\)"
+                        isOpen = False
+                else:
+                    newContent += word
+
+            f.write("<div> <b>Задание " + str(taskCounter) + "</b> (" + str(self.__taskWeight[taskType]) + " баллов)." + newContent + "</div>")
+
+        f.write(
+            r"""
+            </div>
+            <table style='width:80%;margin-top:20px;border-width:0;margin-right:40px'>
+                <tr>
+                    <td align='left'> &nbsp; Профессор, д.ф.-м.н.</td>
+                    <td align='center'><img src='../../signature/signature.png' width='90' height='50'/></td>
+                    <td align='right'>П.Е. Рябов</td>
+                </tr>
+            </table>
+            </BODY>
+            </html>
+            """)
+        f.close()
+        self.__checkAnswersFolder()
+        htmlAnswersPath = os.path.join(os.getcwd(), "answers", "html_answers")
+        os.replace(htmlTicketFile, os.path.join(htmlAnswersPath, "ticket" + str(counter) + ".html"))
 
     def __createDocTitle(self, ticketNumber):
         doc = Document()
@@ -166,7 +221,6 @@ class Generator:
         return doc
 
     def __addDocContent(self, doc, problemsAndSolutions, withAnswers=False):
-        taskAndAnswerIndex = 0
         for task in problemsAndSolutions:
             problem = task[0]
             solution = task[1]
@@ -174,38 +228,43 @@ class Generator:
             doc.append(NoEscape(problem))
             if (withAnswers):
                 doc.append(NoEscape(solution))
-
-        doc.append(NoEscape(
-            r"""$\\$
-            \begin{minipage}{0.3\textwidth}
-              Профессор, д.ф.-м.н.
-            \end{minipage}
-            \hfill
-            \begin{minipage}{0.3\textwidth}
-              \includegraphics[width=20mm,scale=0.5]{signature}
-            \end{minipage}
-            \begin{minipage}{0.3\textwidth}
-              П. Е. Рябов
-            \end{minipage}"""
-        ))
+        if (withAnswers == False):
+            doc.append(NoEscape(
+                r"""$\\$
+                \begin{minipage}{0.3\textwidth}
+                  Профессор, д.ф.-м.н.
+                \end{minipage}
+                \hfill
+                \begin{minipage}{0.3\textwidth}
+                  \includegraphics[width=20mm,scale=0.5]{signature}
+                \end{minipage}
+                \begin{minipage}{0.3\textwidth}
+                  П. Е. Рябов
+                \end{minipage}"""
+            ))
         return doc
 
-    def createTickets(self, n):
+    def __checkAnswersFolder(self):
         if "answers" not in os.listdir(os.getcwd()):
             os.mkdir(os.path.join(os.getcwd(), 'answers'))
             os.mkdir(os.path.join(os.getcwd(), 'answers', 'tasks'))
             os.mkdir(os.path.join(os.getcwd(), 'answers', 'answers'))
+            os.mkdir(os.path.join(os.getcwd(), 'answers', 'html_answers'))
         else:
             if ("tasks" not in os.listdir(os.path.join(os.getcwd(), 'answers'))):
                 os.mkdir(os.path.join(os.getcwd(), 'answers', 'tasks'))
             if ("answers" not in os.listdir(os.path.join(os.getcwd(), 'answers'))):
                 os.mkdir(os.path.join(os.getcwd(), 'answers', 'answers'))
+            if ("html_answers" not in os.listdir(os.path.join(os.getcwd(), 'answers'))):
+                os.mkdir(os.path.join(os.getcwd(), 'answers', 'html_answers'))
 
+    def createTickets(self, n, html=False):
+        self.__checkAnswersFolder()
         k = 0
         for i in range(n):
             k += 1
             selectedFiles = self.selectFiles()
-            problemsAndSolutions = self.getProblemSolution(selectedFiles)
+            problemsAndSolutions = self.__getProblemSolution(selectedFiles, html, k)
 
             docWithAnswers, = self.__addDocContent(self.__createDocTitle(k), problemsAndSolutions, True),
             doc = self.__addDocContent(self.__createDocTitle(k), problemsAndSolutions)
