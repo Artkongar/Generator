@@ -4,7 +4,49 @@
     <script type='text/javascript'
             src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'>
     </script>
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script>
+        $.fn.hyphenate = function () {
+            var RusA = "[абвгдеёжзийклмнопрстуфхцчшщъыьэюя]";
+            var RusV = "[аеёиоуыэю\я]";
+            var RusN = "[бвгджзклмнпрстфхцчшщ]";
+            var RusX = "[йъь]";
+            var Hyphen = "\xAD";
+
+            var re1 = new RegExp("(" + RusX + ")(" + RusA + RusA + ")", "ig");
+            var re2 = new RegExp("(" + RusV + ")(" + RusV + RusA + ")", "ig");
+            var re3 = new RegExp("(" + RusV + RusN + ")(" + RusN + RusV + ")", "ig");
+            var re4 = new RegExp("(" + RusN + RusV + ")(" + RusN + RusV + ")", "ig");
+            var re5 = new RegExp("(" + RusV + RusN + ")(" + RusN + RusN + RusV + ")", "ig");
+            var re6 = new RegExp("(" + RusV + RusN + RusN + ")(" + RusN + RusN + RusV + ")", "ig");
+            console.log(this);
+            this.each(function () {
+                var text = $(this).html();
+                text = text.replace(re1, "$1" + Hyphen + "$2");
+                text = text.replace(re2, "$1" + Hyphen + "$2");
+                text = text.replace(re3, "$1" + Hyphen + "$2");
+                text = text.replace(re4, "$1" + Hyphen + "$2");
+                text = text.replace(re5, "$1" + Hyphen + "$2");
+                text = text.replace(re6, "$1" + Hyphen + "$2");
+                $(this).html(text);
+            });
+        };
+    </script>
+    <script>
+        $(function () {
+            $('body').hyphenate();
+        });
+    </script>
+
     <style type='text/css'>
+        body {
+            text-align: justify; /* Выравнивание по ширине */
+            margin-left: 2cm;
+            margin-right: 1cm;
+            margin-top: 2cm;
+            margin-bottom: 2cm;
+        }
+
         h1 {
             font-size: 11pt;
             font-family: Calibri;
@@ -69,12 +111,14 @@
             text-align-last: left;
         }
 
+        .task_number {
+            font-size: 1.2em;
+        }
     </style>
-    <TITLE>Билет по ТВиМС</TITLE>
 </HEAD>
 
 <BODY>
-<p style='display:none'>
+<p id="packages" style='display:none'>
 </p>
 <div>
     <div class='F'>
