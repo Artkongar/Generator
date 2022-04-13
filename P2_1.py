@@ -1,6 +1,9 @@
 import scipy.stats as stats
 
 import random
+
+from sympy import latex
+
 from Generator_iter2 import Parameterizer
 
 
@@ -16,12 +19,12 @@ class TestParameterizer2_1(Parameterizer):
         dig = 5
 
         bindings = {
-            "0": A0,
-            "1": A1,
-            "2": A2,
-            "3": A3,
-            "4": A4,
-            "5": A5,
-            "6": A6
+            "0": latex(A0),
+            "1": latex(A1),
+            "2": latex(A3),
+            "4": latex(A2),
+            "3": latex(A4),
+            "5": latex(A5),
+            "6": latex(A6)
         }
         return bindings

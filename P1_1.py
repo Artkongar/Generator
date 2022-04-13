@@ -3,7 +3,7 @@ import scipy.stats as stats
 import random
 
 from numpy import sqrt
-from sympy import Rational, exp, pi, symbols
+from sympy import Rational, exp, pi, symbols, latex
 
 from Generator_iter2 import Parameterizer
 
@@ -48,12 +48,12 @@ class TestParameterizer1_1(Parameterizer):
         rho = Rational(-(b / sqrt(a * c))).limit_denominator(1550000)
 
         bindings = {
-            "Q": q(x,y),
-            "EX": muX,
-            "EY": muY,
-            "VARX": VarX,
-            "VARY": VarY,
-            "COVXY": CovXY,
-            "RHO": rho
+            "Q": latex(q(x,y)),
+            "EX": latex(muX),
+            "EY": latex(muY),
+            "VARX": latex(VarX),
+            "VARY": latex(VarY),
+            "COVXY": latex(CovXY),
+            "RHO": latex(rho)
         }
         return bindings

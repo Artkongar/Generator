@@ -15,6 +15,13 @@ import json
 class Parameterizer(ABC):
     __expression = None
     __fileName = None
+    __ticketNumber = None
+
+    def setTicketNumber(self, ticketNumber):
+        self.__ticketNumber = ticketNumber
+
+    def getTicketNumber(self):
+        return self.__ticketNumber
 
     def setFileName(self, name):
         self.__fileName = name
@@ -41,7 +48,7 @@ class Parameterizer(ABC):
                     f"Not all variables are bound\nThis variables must be bound: {variables}\nNo '{variable}' in {[i for i in calculatedVariables]}\nFile name = '{self.__fileName}'")
 
         for variable, value in calculatedVariables.items():
-            self.__expression = self.__expression.replace(f"<{variable}>", "{" + latex(value) + "}")
+            self.__expression = self.__expression.replace(f"<{variable}>", "{" + str(value) + "}")
 
         return self.__expression
 
@@ -87,7 +94,7 @@ class Generator:
         except:
             raise Exception("'taskWeight.json' was not created")
 
-    def __getProblemSolution(self, ticketFiles):
+    def __getProblemSolution(self, ticketFiles, k):
         problemAndSolution = {}
 
         for file in ticketFiles:
@@ -101,7 +108,9 @@ class Generator:
 
             if (solver not in self.__solver):
                 raise Exception(f"Add Parametrizator for '{solver}' file")
+
             solverInstance = self.__solver[solver]()
+            solverInstance.setTicketNumber(k)
             solverInstance.setFileName(solver)
             solverInstance.setExpression(text)
             parametrizedText = solverInstance.parametrizeExpression()
@@ -134,8 +143,8 @@ class Generator:
                 newContent += word
         return newContent
 
-    def __getProblemSolutionHtml(self, ticketFiles):
-        problemsAndSolutions = self.__getProblemSolution(ticketFiles)
+    def __getProblemSolutionHtml(self, ticketFiles, k):
+        problemsAndSolutions = self.__getProblemSolution(ticketFiles, k)
         result = {}
         for taskType, problemsAndSolutions_ in problemsAndSolutions.items():
             wrappedProblemAndSolution = []
@@ -148,8 +157,8 @@ class Generator:
 
         return result
 
-    def __getProblemSolutionTex(self, ticketFiles):
-        problemsAndSolutions = self.__getProblemSolution(ticketFiles)
+    def __getProblemSolutionTex(self, ticketFiles, k):
+        problemsAndSolutions = self.__getProblemSolution(ticketFiles, k)
         result = {}
         for taskType, problemsAndSolutions_ in problemsAndSolutions.items():
             wrappedProblemAndSolution = []
@@ -171,7 +180,7 @@ class Generator:
             \usepackage{thmtools}
             \usepackage{graphicx}
             \usepackage[russian]{babel}
-            \graphicspath{ {../../signature/} }
+            \graphicspath{ {../../pictures/} }
             \declaretheoremstyle[headfont=\bfseries]{normalhead}
             \theoremstyle{normalhead}%
             
@@ -225,9 +234,9 @@ class Generator:
                 problem, solution = problemAndSolution
                 taskTypeDef = ""
                 if (self.__withTitle and withAnswers):
-                    taskTypeDef += self.__taskWeight[taskType][0]
+                    taskTypeDef += self.__taskWeight[taskType][0] + "\n"
                 doc.append(NoEscape(r"\begin{problem}" + "\n(" + str(
-                    self.__taskWeight[taskType][1]) + ") " + taskTypeDef + "\n" + problem + r"\end{problem}" + "\n"))
+                    self.__taskWeight[taskType][1]) + ") " + taskTypeDef + problem + r"\end{problem}" + "\n"))
                 if (withAnswers):
                     doc.append(NoEscape("\n" + r"\begin{solution*}" + solution + r"\end{solution*}" + "\n"))
 
@@ -299,7 +308,7 @@ class Generator:
             <table style='width:80%;margin-top:20px;border-width:0;margin-right:40px'>
                 <tr>
                     <td align='left'> &nbsp; Профессор, д.ф.-м.н.</td>
-                    <td align='center'><img src='../../signature/signature.png' width='90' height='50'/></td>
+                    <td align='center'><img src='../../pictures/signature.png' width='90' height='50'/></td>
                     <td align='right'>П.Е. Рябов</td>
                 </tr>
             </table>
@@ -315,9 +324,11 @@ class Generator:
         if (withAnswers == False):
             htmlAnswersPath = os.path.join(os.getcwd(), "answers", "html_tickets")
             os.replace(htmlTicketFile, os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + ".html"))
+            self.__replacePicterFormatTexToHtml(os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + ".html"))
         else:
             htmlAnswersPath = os.path.join(os.getcwd(), "answers", "html_answers")
             os.replace(htmlTicketFile, os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
+            self.__replacePicterFormatTexToHtml(os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
 
     def __createTexTicket(self, problemsAndSolutions, counter, withAnswers=False):
         doc = self.__addDocContentTex(self.__createDocTitleTex(counter), problemsAndSolutions)
@@ -346,11 +357,11 @@ class Generator:
         for i in range(n):
             selectedFiles = self.__selectFiles()
 
-            problemSolutionTex = self.__getProblemSolutionTex(selectedFiles)
+            problemSolutionTex = self.__getProblemSolutionTex(selectedFiles, k)
             self.__createTexTicket(problemSolutionTex, k, True)
 
             if (html):
-                problemSolutionHtml = self.__getProblemSolutionHtml(selectedFiles)
+                problemSolutionHtml = self.__getProblemSolutionHtml(selectedFiles, k)
                 self.__createHtmlTicket(problemSolutionHtml, k, "ticket", True)
                 self.__createHtmlTicket(problemSolutionHtml, k, "ticket")
 
@@ -426,3 +437,31 @@ class Generator:
             os.path.join(mainPath, "answers", "html_tickets"),
             os.path.join(mainPath, "answers", "all_tickets_html")
         )
+
+    def __replacePicterFormatTexToHtml(self, fileName):
+        f = open(fileName, "r", encoding="utf-8")
+        data = f.read()
+        f.close()
+
+        texPictures = re.findall(r"\\includegraphics\[[\s\S]*?]\{\{[\s\S]*?}}", data)
+
+        for texPic in texPictures:
+            params = re.findall(r"\[([\s\S]*?)]", texPic)[0].replace(" ", "").split(",")
+            params = {param.split("=")[0]: param.split("=")[1] for param in params if param != ""}
+            width = "auto"
+            height = "auto"
+            for param in params:
+                if (param == "width"):
+                    width = str(int(params[param].replace("mm", "")) * 5) + "mm"
+                    break
+                elif (param == "height"):
+                    height = str(int(params[param].replace("mm", "")) * 5) + "mm"
+                    break
+            picName = re.findall(r"\{\{([\s\S]*?)}}", texPic)[0]
+            htmlImage = f"<img src='../../pictures/{picName}.png' width='{width}' height='{height}'>"
+
+            data = data.replace(texPic, htmlImage + "<br>")
+
+        f = open(fileName, "w", encoding="utf-8")
+        f.write(data)
+        f.close()

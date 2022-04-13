@@ -6,6 +6,7 @@ import numpy as np
 import random
 from Generator_iter2 import Parameterizer
 
+
 class TestParameterizer3_4(Parameterizer):
     def solveExpression(self):
         a = random.randint(1, 10)
@@ -23,17 +24,17 @@ class TestParameterizer3_4(Parameterizer):
         p = (2 * s - 1) / (2 * s) - t / 2
 
         bindings = {
-            "a": a,
-            "b": b,
-            "z1": z1,
-            "z2": z2,
-            "q1a": q1a,
-            "Q1": q1,
-            "Q3": q3(x),
-            "Q4": q4(x),
-            "Q5": q5(x),
-            "Q6": q6(x),
-            "p": p
+            "a": latex(a),
+            "b": latex(b),
+            "z1": latex(z1),
+            "z2": latex(z2),
+            "q1a": latex(q1a),
+            "Q1": latex(q1),
+            "Q3": latex(q3(x)),
+            "Q4": latex(q4(x)),
+            "Q5": latex(q5(x)),
+            "Q6": latex(q6(x)),
+            "p": latex(p)
         }
 
         return bindings

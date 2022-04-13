@@ -17,6 +17,7 @@ solvers = {
 }
 
 g = Generator(solvers)
+
 g.createTickets(5, html=True, startIndex=10, withTitle=True)
 g.createAllTasksTex()
 g.createAllTasksHtml()
