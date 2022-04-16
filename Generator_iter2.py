@@ -48,7 +48,7 @@ class Parameterizer(ABC):
                     f"Not all variables are bound\nThis variables must be bound: {variables}\nNo '{variable}' in {[i for i in calculatedVariables]}\nFile name = '{self.__fileName}'")
 
         for variable, value in calculatedVariables.items():
-            self.__expression = self.__expression.replace(f"<{variable}>", "{" + str(value) + "}")
+            self.__expression = self.__expression.replace(f"<{variable}>", str(value))
 
         return self.__expression
 
@@ -62,6 +62,7 @@ class Generator:
     __taskWeight = {}
     __isTicketGenerated = False
     __withTitle = False
+    __problemAndSolution = None
 
     def __init__(self, solver):
         self.__solver = solver
@@ -95,6 +96,11 @@ class Generator:
             raise Exception("'taskWeight.json' was not created")
 
     def __getProblemSolution(self, ticketFiles, k):
+        if (self.__problemAndSolution == None):
+            self.__problemAndSolution = {}
+        else:
+            if (k in self.__problemAndSolution):
+                return self.__problemAndSolution[k]
         problemAndSolution = {}
 
         for file in ticketFiles:
@@ -126,6 +132,8 @@ class Generator:
             if (taskType not in problemAndSolution):
                 problemAndSolution[taskType] = []
             problemAndSolution[taskType].append([problem, solution])
+
+        self.__problemAndSolution[k] = problemAndSolution
         return problemAndSolution
 
     def __wrapContentForHtml(self, content):
@@ -180,6 +188,7 @@ class Generator:
             \usepackage{thmtools}
             \usepackage{graphicx}
             \usepackage[russian]{babel}
+            \usepackage{underscore}
             \graphicspath{ {../../pictures/} }
             \declaretheoremstyle[headfont=\bfseries]{normalhead}
             \theoremstyle{normalhead}%
@@ -259,7 +268,7 @@ class Generator:
     def __checkAnswersFolder(self):
         answersPath = ['tickets', 'answers', 'html_tickets', 'html_answers', 'all_tickets_tex',
                        'all_tickets_answers_tex',
-                       'all_tickets_html', 'all_tickets_answers_html']
+                       'all_tickets_html', 'all_tickets_answers_html', 'test_tasks']
         if "answers" not in os.listdir(os.getcwd()):
             os.mkdir(os.path.join(os.getcwd(), 'answers'))
             for i in answersPath:
@@ -328,7 +337,8 @@ class Generator:
         else:
             htmlAnswersPath = os.path.join(os.getcwd(), "answers", "html_answers")
             os.replace(htmlTicketFile, os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
-            self.__replacePicterFormatTexToHtml(os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
+            self.__replacePicterFormatTexToHtml(
+                os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
 
     def __createTexTicket(self, problemsAndSolutions, counter, withAnswers=False):
         doc = self.__addDocContentTex(self.__createDocTitleTex(counter), problemsAndSolutions)
@@ -443,7 +453,7 @@ class Generator:
         data = f.read()
         f.close()
 
-        texPictures = re.findall(r"\\includegraphics\[[\s\S]*?]\{\{[\s\S]*?}}", data)
+        texPictures = re.findall(r"\\includegraphics\[[\s\S]*?]\{[\s\S]*?}", data)
 
         for texPic in texPictures:
             params = re.findall(r"\[([\s\S]*?)]", texPic)[0].replace(" ", "").split(",")
@@ -457,7 +467,7 @@ class Generator:
                 elif (param == "height"):
                     height = str(int(params[param].replace("mm", "")) * 5) + "mm"
                     break
-            picName = re.findall(r"\{\{([\s\S]*?)}}", texPic)[0]
+            picName = re.findall(r"\{([\s\S]*?)}", texPic)[0]
             htmlImage = f"<img src='../../pictures/{picName}.png' width='{width}' height='{height}'>"
 
             data = data.replace(texPic, htmlImage + "<br>")
@@ -465,3 +475,44 @@ class Generator:
         f = open(fileName, "w", encoding="utf-8")
         f.write(data)
         f.close()
+
+    def checkAllTasks(self):
+        self.__checkAnswersFolder()
+
+        mainPath = os.getcwd()
+        taskPath = os.path.join(mainPath, "tex")
+        taskTypesPath = [os.path.join(taskPath, i) for i in os.listdir(taskPath) if
+                         i != "packages.tex" and i != "taskWeight.json"]
+        ticketFiles = []
+        for taskType in taskTypesPath:
+            ticketFiles += [os.path.join(taskType, file) for file in os.listdir(taskType)]
+
+        testTicketName = "Тестовый"
+        problemSolutionTex = self.__getProblemSolutionTex(ticketFiles, testTicketName)
+        self.__createTexTicket(problemSolutionTex, testTicketName, True)
+
+        problemSolutionHtml = self.__getProblemSolutionHtml(ticketFiles, testTicketName)
+        self.__createHtmlTicket(problemSolutionHtml, testTicketName, "ticket", True)
+        self.__createHtmlTicket(problemSolutionHtml, testTicketName, "ticket")
+
+        testFileNameAnswers = f"ticket{testTicketName}_answers"
+        testFileName = f"ticket{testTicketName}"
+        answerPath = os.path.join(mainPath, "answers", "tickets")
+        answerPathHtml = os.path.join(mainPath, "answers", "html_tickets")
+        answerPathAnswers = os.path.join(mainPath, "answers", "answers")
+        answerPathAnswersHtml = os.path.join(mainPath, "answers", "html_answers")
+        testPath = os.path.join(mainPath, "answers", "test_tasks")
+
+        os.replace(os.path.join(answerPathAnswers, testFileNameAnswers + ".tex"),
+                   os.path.join(testPath, testFileNameAnswers + ".tex")
+                   )
+        os.replace(os.path.join(answerPath, testFileName + ".tex"),
+                   os.path.join(testPath, testFileName + ".tex")
+                   )
+
+        os.replace(os.path.join(answerPathAnswersHtml, testFileNameAnswers + ".html"),
+                   os.path.join(testPath, testFileNameAnswers + ".html")
+                   )
+        os.replace(os.path.join(answerPathHtml, testFileName + ".html"),
+                   os.path.join(testPath, testFileName + ".html")
+                   )
