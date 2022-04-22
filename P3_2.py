@@ -37,7 +37,7 @@ def figure(k,A,B,C):
     font = font0.copy()
     font.set_style('italic')
     font.set_weight('bold')
-    fig.savefig('/pictures' + str(k) + '.png', bbox_inches='tight')
+    fig.savefig('pictures/' + str(k) + '.png', bbox_inches='tight')
 
 class TestParameterizer3_2(Parameterizer):
     def solveExpression(self):
