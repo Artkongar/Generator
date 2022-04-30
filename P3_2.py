@@ -8,7 +8,7 @@ from matplotlib.font_manager import FontProperties
 
 import numpy as np
 import random
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 def figure(k,A,B,C):
     a1=2*A
@@ -39,7 +39,7 @@ def figure(k,A,B,C):
     font.set_weight('bold')
     fig.savefig('pictures/' + str(k) + '.png', bbox_inches='tight')
 
-class TestParameterizer3_2(Parameterizer):
+class TestParameterizerImpl3_2(ParameterizerImpl):
     def solveExpression(self):
         a = random.randint(-10, 10)
         b = random.randint(a + 1, 20)

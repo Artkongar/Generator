@@ -4,10 +4,10 @@ from sympy.abc import x
 import numpy as np
 
 import random
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 
-class TestParameterizer3_4(Parameterizer):
+class TestParameterizerImpl3_4(ParameterizerImpl):
     def solveExpression(self):
         a = random.randint(1, 10)
         b = random.randint(1, 10)

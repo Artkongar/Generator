@@ -6,7 +6,7 @@ import scipy.stats as stats
 import numpy as np
 import pandas as pd
 
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 
 def createDataSet(ticketNumber, dataSet, path):
@@ -22,7 +22,7 @@ def createDataSet(ticketNumber, dataSet, path):
     return dataSetFileName
 
 
-class TestParameterizer4_1(Parameterizer):
+class TestParameterizerImpl4_1(ParameterizerImpl):
     def solveExpression(self):
         ticketNumber = self.getTicketNumber()
 

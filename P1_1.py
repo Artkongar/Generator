@@ -5,10 +5,10 @@ import random
 from numpy import sqrt
 from sympy import Rational, exp, pi, symbols, latex
 
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 
-class TestParameterizer1_1(Parameterizer):
+class TestParameterizerImpl1_1(ParameterizerImpl):
     def solveExpression(self):
         x, y, a, b, c, d, e = symbols('x y a b c d e')
         sol = [[1, 4, 25], [5, 4, 5], [25, 4, 1], [1, 3, 25], [5, 3, 5], [25, 3, 1], [13, 12, 13], [4, 8, 25],

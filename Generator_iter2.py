@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from interfaces.Interfaces import Generator, Parameterizer
 
 from sympy import *
 
@@ -12,7 +13,7 @@ import random
 import json
 
 
-class Parameterizer(ABC):
+class ParameterizerImpl(Parameterizer):
     __expression = None
     __fileName = None
     __ticketNumber = None
@@ -57,7 +58,7 @@ class Parameterizer(ABC):
         pass
 
 
-class Generator:
+class GeneratorImpl(Generator):
     __solver = {}
     __taskWeight = {}
     __isTicketGenerated = False

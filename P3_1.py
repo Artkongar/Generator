@@ -9,7 +9,7 @@ from matplotlib.font_manager import FontProperties
 import numpy as np
 import random
 
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 def figure(k,A,B,C):
     a1=2*A
@@ -40,7 +40,7 @@ def figure(k,A,B,C):
     fig.savefig("pictures/" + str(k)+'.png', bbox_inches='tight')
 
 
-class TestParameterizer3_1(Parameterizer):
+class TestParameterizerImpl3_1(ParameterizerImpl):
     def solveExpression(self):
         ticketNumber = self.getTicketNumber()
 

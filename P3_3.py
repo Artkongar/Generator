@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 import random
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 def figure(k,A,B,C):
     a1=-(B-A)
@@ -40,7 +40,7 @@ def figure(k,A,B,C):
     fig.savefig('pictures/' + "t3_3_1_" + str(k) + '.png', bbox_inches='tight')
 
 
-class TestParameterizer3_3(Parameterizer):
+class TestParameterizerImpl3_3(ParameterizerImpl):
     def solveExpression(self):
         a = random.randint(-10, 10)
         b = random.randint(a + 1, 20)

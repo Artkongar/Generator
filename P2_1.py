@@ -4,10 +4,10 @@ import random
 
 from sympy import latex
 
-from Generator_iter2 import Parameterizer
+from Generator_iter2 import ParameterizerImpl
 
 
-class TestParameterizer2_1(Parameterizer):
+class TestParameterizerImpl2_1(ParameterizerImpl):
     def solveExpression(self):
         A0 = random.randint(13, 27)  # число степеней свободы
         A1 = random.randint(5, 37) + random.random()
