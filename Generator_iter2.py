@@ -179,7 +179,7 @@ class GeneratorImpl(Generator):
             result[taskType] = wrappedProblemAndSolution
         return result
 
-    def __createDocTitleTex(self, ticketNumber):
+    def __createDocTitleTex(self, ticketNumber, pdf=False):
         doc = Document()
         doc.packages.clear()
 
@@ -189,14 +189,18 @@ class GeneratorImpl(Generator):
             \usepackage{thmtools}
             \usepackage{graphicx}
             \usepackage[russian]{babel}
-            \usepackage{underscore}
-            \graphicspath{ {../../pictures/} }
+            \usepackage{underscore}"""))
+        if (pdf):
+            doc.packages.append(NoEscape(r"\graphicspath{ {pictures/} }"))
+        else:
+            doc.packages.append(NoEscape(r"\graphicspath{ {../../pictures/} }"))
+        doc.packages.append(NoEscape(
+            r"""
             \declaretheoremstyle[headfont=\bfseries]{normalhead}
             \theoremstyle{normalhead}%
             
             \newtheorem*{solution*}{Ответ}
-            \newtheorem{problem}{}
-            """))
+            \newtheorem{problem}{}"""))
 
         packageFile = open(os.path.join(os.getcwd(), "tex", "packages.tex"), encoding="utf-8")
         doc.packages.append(NoEscape(packageFile.read()))
@@ -269,7 +273,7 @@ class GeneratorImpl(Generator):
     def __checkAnswersFolder(self):
         answersPath = ['tickets', 'answers', 'html_tickets', 'html_answers', 'all_tickets_tex',
                        'all_tickets_answers_tex',
-                       'all_tickets_html', 'all_tickets_answers_html', 'test_tasks']
+                       'all_tickets_html', 'all_tickets_answers_html', 'test_tasks', 'pdf']
         if "answers" not in os.listdir(os.getcwd()):
             os.mkdir(os.path.join(os.getcwd(), 'answers'))
             for i in answersPath:
@@ -341,13 +345,23 @@ class GeneratorImpl(Generator):
             self.__replacePicterFormatTexToHtml(
                 os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
 
+
     def __createTexTicket(self, problemsAndSolutions, counter, withAnswers=False):
         doc = self.__addDocContentTex(self.__createDocTitleTex(counter), problemsAndSolutions)
+        docPDF = self.__addDocContentTex(self.__createDocTitleTex(counter, True), problemsAndSolutions)
 
         texFileAnsPostfix = "_answers"
         texFileName = 'ticket' + str(counter)
+        texFileNamePDFName = texFileName + "_PDF"
 
         doc.generate_tex(texFileName)
+        docPDF.generate_pdf(texFileNamePDFName)
+
+        os.replace(
+            os.path.join(os.getcwd(), texFileNamePDFName + ".pdf"),
+            os.path.join(os.getcwd(), "answers", "pdf", texFileNamePDFName + ".pdf")
+        )
+
         os.replace(
             os.path.join(os.getcwd(), texFileName + ".tex"),
             os.path.join(os.getcwd(), "answers", "tickets", texFileName + ".tex")
@@ -360,6 +374,14 @@ class GeneratorImpl(Generator):
                 os.path.join(os.getcwd(), texFileName + texFileAnsPostfix + ".tex"),
                 os.path.join(os.getcwd(), "answers", "answers", texFileName + texFileAnsPostfix + ".tex")
             )
+
+            docWithAnswersPDF = self.__addDocContentTex(self.__createDocTitleTex(counter, True), problemsAndSolutions, True)
+            docWithAnswersPDF.generate_pdf(texFileName + texFileAnsPostfix + "_PDF")
+            os.replace(
+                os.path.join(os.getcwd(), texFileName + texFileAnsPostfix + "_PDF" + ".pdf"),
+                os.path.join(os.getcwd(), "answers", "pdf", texFileName + texFileAnsPostfix + "_PDF" + ".pdf")
+            )
+
 
     def createTickets(self, n, html=False, startIndex=1, withTitle=False):
         self.__withTitle = withTitle
