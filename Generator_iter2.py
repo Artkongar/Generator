@@ -12,9 +12,6 @@ import re
 import random
 import json
 
-import time
-import threading
-
 
 class ParameterizerImpl(Parameterizer):
     __expression = None
@@ -386,32 +383,22 @@ class GeneratorImpl(Generator):
             )
 
 
-    def __createTicket(self, k, html=False):
-        print(f"Ticket {k} start creating")
-        selectedFiles = self.__selectFiles()
-
-        problemSolutionTex = self.__getProblemSolutionTex(selectedFiles, k)
-        self.__createTexTicket(problemSolutionTex, k, True)
-
-        if (html):
-            problemSolutionHtml = self.__getProblemSolutionHtml(selectedFiles, k)
-            self.__createHtmlTicket(problemSolutionHtml, k, "ticket", True)
-            self.__createHtmlTicket(problemSolutionHtml, k, "ticket")
-        print(f"Ticket {k} creating finished")
-
     def createTickets(self, n, html=False, startIndex=1, withTitle=False):
         self.__withTitle = withTitle
         self.__checkAnswersFolder()
         k = startIndex
-        threads = []
         for i in range(n):
-            thread = threading.Thread(target=self.__createTicket, args=(k, html))
-            threads.append(thread)
+            selectedFiles = self.__selectFiles()
+
+            problemSolutionTex = self.__getProblemSolutionTex(selectedFiles, k)
+            self.__createTexTicket(problemSolutionTex, k, True)
+
+            if (html):
+                problemSolutionHtml = self.__getProblemSolutionHtml(selectedFiles, k)
+                self.__createHtmlTicket(problemSolutionHtml, k, "ticket", True)
+                self.__createHtmlTicket(problemSolutionHtml, k, "ticket")
+
             k += 1
-        for i in threads:
-            i.start()
-        for i in threads:
-            i.join()
         self.__isTicketGenerated = True
 
     def __writeAllTasksInOneTexFile(self, fromPath, toPath):
