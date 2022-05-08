@@ -11,7 +11,11 @@ from Generator_iter2 import ParameterizerImpl
 
 def createDataSet(ticketNumber, dataSet, path):
     if ("datasets" not in os.listdir(os.getcwd())):
-        os.mkdir(os.path.join(os.getcwd(), "datasets"))
+        try:
+            os.mkdir(os.path.join(os.getcwd(), "datasets"))
+        except:
+            pass
+
     var = 1
     dataSetFileName = f"ds{ticketNumber}_{var}.csv"
     while (dataSetFileName in os.listdir(os.path.join(os.getcwd(), path))):
