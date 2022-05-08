@@ -20,7 +20,7 @@ solvers = {
 
 g = GeneratorImpl(solvers)
 
-g.createTickets(3, html=True, startIndex=10, withTitle=False)
+g.createTickets(30, html=True, startIndex=10, withTitle=False)
 g.createAllTasksTex()
 g.createAllTasksHtml()
 g.checkAllTasks()
