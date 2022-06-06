@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 import random
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 def figure(k,A,B,C):
     a1=-(B-A)

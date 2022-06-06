@@ -1,4 +1,4 @@
-from Generator_iter2 import GeneratorImpl
+from Generator import GeneratorImpl
 
 from P3_1 import TestParameterizerImpl3_1
 from P3_2 import TestParameterizerImpl3_2
@@ -20,7 +20,7 @@ solvers = {
 
 g = GeneratorImpl(solvers)
 
-g.createTickets(3, html=True, startIndex=10, withTitle=False)
+g.createTickets(3, html=True, startIndex=10, withTitle=True)
 g.createAllTasksTex()
 g.createAllTasksHtml()
 g.checkAllTasks()

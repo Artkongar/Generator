@@ -8,7 +8,7 @@ from matplotlib.font_manager import FontProperties
 
 import numpy as np
 import random
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 def figure(k,A,B,C):
     a1=2*A

@@ -91,7 +91,7 @@ class GeneratorImpl(Generator):
     def __loadTaskWeights(self):
         taskWeightFile = os.path.join(os.path.join(os.getcwd(), "tex"), "taskWeight.json")
         try:
-            with open(taskWeightFile, "r") as read_file:
+            with open(taskWeightFile, "r", encoding="utf-8") as read_file:
                 self.__taskWeight = json.load(read_file)
         except:
             raise Exception("'taskWeight.json' was not created")
@@ -238,7 +238,7 @@ class GeneratorImpl(Generator):
 
             \hfill \break
             \centerline{\large{\textbf{""" + f"Билет {counter}." + """}}}
-                    \end{center}"""
+            \end{center}"""
         ))
         return doc
 

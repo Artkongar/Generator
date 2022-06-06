@@ -6,7 +6,7 @@ import scipy.stats as stats
 import numpy as np
 import pandas as pd
 
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 
 def createDataSet(ticketNumber, dataSet, path):
@@ -45,8 +45,8 @@ class TestParameterizerImpl4_1(ParameterizerImpl):
         bindings = {
             "0": dataSetFileName,
             "1": gamma,
-            "2": hatrho,
-            "3": teta_1,
-            "4": teta_2
+            "2": round(hatrho, 3),
+            "3": round(teta_1, 3),
+            "4": round(teta_2, 3)
         }
         return bindings

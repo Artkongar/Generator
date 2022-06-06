@@ -4,7 +4,7 @@ from sympy.abc import x
 import numpy as np
 
 import random
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 
 class TestParameterizerImpl3_4(ParameterizerImpl):

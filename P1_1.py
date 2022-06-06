@@ -5,7 +5,7 @@ import random
 from numpy import sqrt
 from sympy import Rational, exp, pi, symbols, latex
 
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 
 class TestParameterizerImpl1_1(ParameterizerImpl):

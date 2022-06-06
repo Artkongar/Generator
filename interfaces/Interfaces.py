@@ -8,7 +8,7 @@ class Generator(ABC):
         pass
 
     @abstractmethod
-    def createTickets(self):
+    def createTickets(self, n, html=False, startIndex=1, withTitle=False):
         pass
 
     @abstractmethod

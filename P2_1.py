@@ -1,10 +1,9 @@
 import scipy.stats as stats
-
 import random
 
 from sympy import latex
 
-from Generator_iter2 import ParameterizerImpl
+from Generator import ParameterizerImpl
 
 
 class TestParameterizerImpl2_1(ParameterizerImpl):
@@ -16,15 +15,15 @@ class TestParameterizerImpl2_1(ParameterizerImpl):
         A4 = A3 / 100
         A5 = random.randint(3, 11)  # число степеней свободы
         A6 = stats.chi2.isf(A4, A5)
-        dig = 5
+        dig = 2
 
         bindings = {
             "0": latex(A0),
-            "1": latex(A1),
+            "1": latex(round(A1, dig)),
             "2": latex(A3),
-            "4": latex(A2),
+            "4": latex(round(A2, dig)),
             "3": latex(A4),
             "5": latex(A5),
-            "6": latex(A6)
+            "6": latex(round(A6, dig))
         }
         return bindings
