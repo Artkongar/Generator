@@ -198,7 +198,7 @@ class GeneratorImpl(Generator):
             r"""
             \declaretheoremstyle[headfont=\bfseries]{normalhead}
             \theoremstyle{normalhead}%
-            
+
             \newtheorem*{solution*}{Ответ}
             \newtheorem{problem}{}"""))
 
@@ -217,29 +217,16 @@ class GeneratorImpl(Generator):
 
     def __addTexHeader(self, doc, counter):
         doc.append(NoEscape(
-            r"""\begin{center}
-            \centerline{\footnotesize{ФЕДЕРАЛЬНОЕ\,\, ГОСУДАРСТВЕННОЕ\,\, ОБРАЗОВАТЕЛЬНОЕ\,\, БЮДЖЕТНОЕ}}
-            \centerline{\footnotesize{УЧРЕЖДЕНИЕ\,\, ВЫСШЕГО\,\, ОБРАЗОВАНИЯ}}
-
-            \centerline{\small{\textbf{<<ФИНАНСВЫЙ\,\,УНИВЕРСИТЕТ\,\,ПРИ\,\,ПРАВИТЕЛЬСТВЕ}}}
-            \centerline{\small{\textbf{РОССИЙСКОЙ\,\,ФЕДЕРАЦИИ>>}}}
-            \centerline{\small{\textbf{(ФИНАНСОВЫЙ УНИВЕРСИТЕТ)}}}
-
-            \hfill \break
-            \normalsize{Департамент анализа данных и машинного обучения}\\
-
-            \hfill \break
-            \centerline{\normalsize{{\textit{\textbf{Дисциплина: <<Теория вероятностей и математическая статистика>>}}}}}
-            \centerline{\small{\textit{Направление подготовки: 01.03.02 <<Прикладная математика и информатика>>}}}
-            \centerline{\small{\textit{Профиль: <<Анализ данных и принятие решений в экономике и финансах>>}}}
-            \centerline{\small{\textit{Факультет информационных технологий и анализа больших данных}}}
-            \centerline{\small{\textit{Форма обучения очная}}}
-            \centerline{\small{\textit{Учебный 2021/2022 год, 3 семестр}}}
-
-            \hfill \break
-            \centerline{\large{\textbf{""" + f"Билет {counter}." + """}}}
-            \end{center}"""
+            r"""\begin{center}"""
         ))
+        f = open("header/header_for_tex.tex", encoding="utf-8")
+        doc.append(NoEscape(
+            f.read()
+        ))
+        f.close()
+        doc.append(NoEscape(r"""\centerline{\large{\textbf{""" + f"Билет {counter}." + """}}}
+            \end{center}"""
+                            ))
         return doc
 
     def __addDocContentTex(self, doc, problemsAndSolutions, withAnswers=False):
@@ -255,19 +242,31 @@ class GeneratorImpl(Generator):
                     doc.append(NoEscape("\n" + r"\begin{solution*}" + solution + r"\end{solution*}" + "\n"))
 
         if (withAnswers == False):
+            signatures = None
+            try:
+                with open('signature/signature.json', "r", encoding="utf-8") as read_file:
+                    signatures = json.load(read_file)
+            except:
+                raise Exception("'signature.json' was not created")
+            lines = []
+            for i in signatures:
+                for j in i:
+                    line = j + " & " + "\includegraphics[width=20mm,scale=0.5]{" + str(i[j][1]) + "} & " + str(
+                        i[j][0]) + " \\\\\\\\"
+                    lines.append(line + "\n")
             doc.append(NoEscape(
                 r"""$\\$
-                \begin{minipage}{0.3\textwidth}
-                  Профессор, д.ф.-м.н.
-                \end{minipage}
-                \hfill
-                \begin{minipage}{0.3\textwidth}
-                  \includegraphics[width=20mm,scale=0.5]{signature}
-                \end{minipage}
-                \begin{minipage}{0.3\textwidth}
-                  П. Е. Рябов
-                \end{minipage}"""
-            ))
+                \begin{tabularx}{0.95\textwidth} { 
+                   >{\raggedright\arraybackslash}X 
+                   >{\centering\arraybackslash}X 
+                   >{\raggedleft\arraybackslash}X }
+                """))
+            for i in lines:
+                doc.append(NoEscape(i))
+            doc.append(NoEscape(r"""
+                \end{tabularx}
+                """))
+
         return doc
 
     def __checkAnswersFolder(self):
@@ -287,8 +286,6 @@ class GeneratorImpl(Generator):
         htmlTemplatePath = os.path.join(os.getcwd(), "html", "utils")
         htmlTemplateFile = os.path.join(htmlTemplatePath, "html_template.html")
 
-        ticketHtmlFileName = ""
-        htmlTicketFile = None
         if (withAnswers):
             ticketHtmlFileName = ticketPrifix + str(counter) + "_answers.html"
             htmlTicketFile = os.path.join(htmlTemplatePath, ticketHtmlFileName)
@@ -297,7 +294,10 @@ class GeneratorImpl(Generator):
             htmlTicketFile = os.path.join(htmlTemplatePath, ticketHtmlFileName)
         shutil.copyfile(htmlTemplateFile, htmlTicketFile)
 
+        headerFile = open("header/header_for_html.html", encoding="utf-8")
         f = open(htmlTicketFile, "a", encoding="utf-8")
+        f.write(headerFile.read())
+        headerFile.close()
         f.write(r"""<h5>Билет """ + str(counter) + r"""</h5><div id="content">""")
         f.write(f"<title>{ticketHtmlFileName}</title>")
         taskCounter = 0
@@ -316,15 +316,33 @@ class GeneratorImpl(Generator):
         packagesFile = open(os.path.join(os.getcwd(), "tex", "packages.tex"), "r", encoding="utf-8")
         packages = packagesFile.read()
         packagesFile.close()
+
+        signatures = None
+        try:
+            with open('signature/signature.json', "r", encoding="utf-8") as read_file:
+                signatures = json.load(read_file)
+        except:
+            raise Exception("'signature.json' was not created")
+        rows = []
+        for i in signatures:
+            for j in i:
+                row = """
+                    <tr>
+                    <td align='left'> &nbsp; """ + str(j) + """</td>
+                    <td align='center'><img src='../../pictures/""" + str(i[j][1]) + """.png' width='90' height='50'/></td>
+                    <td align='right'>""" + str(i[j][0]) + """</td>
+                    </tr>
+                """
+                rows.append(row + "\n")
+
         f.write(
             r"""
             </div>
             <table style='width:80%;margin-top:20px;border-width:0;margin-right:40px'>
-                <tr>
-                    <td align='left'> &nbsp; Профессор, д.ф.-м.н.</td>
-                    <td align='center'><img src='../../pictures/signature.png' width='90' height='50'/></td>
-                    <td align='right'>П.Е. Рябов</td>
-                </tr>
+                """)
+        for row in rows:
+            f.write(row)
+        f.write(r"""
             </table>
             </BODY>
             <script>
@@ -344,7 +362,6 @@ class GeneratorImpl(Generator):
             os.replace(htmlTicketFile, os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
             self.__replacePicterFormatTexToHtml(
                 os.path.join(htmlAnswersPath, ticketPrifix + str(counter) + "_answers.html"))
-
 
     def __createTexTicket(self, problemsAndSolutions, counter, withAnswers=False):
         doc = self.__addDocContentTex(self.__createDocTitleTex(counter), problemsAndSolutions)
@@ -375,13 +392,13 @@ class GeneratorImpl(Generator):
                 os.path.join(os.getcwd(), "answers", "answers", texFileName + texFileAnsPostfix + ".tex")
             )
 
-            docWithAnswersPDF = self.__addDocContentTex(self.__createDocTitleTex(counter, True), problemsAndSolutions, True)
+            docWithAnswersPDF = self.__addDocContentTex(self.__createDocTitleTex(counter, True), problemsAndSolutions,
+                                                        True)
             docWithAnswersPDF.generate_pdf(texFileName + texFileAnsPostfix + "_PDF")
             os.replace(
                 os.path.join(os.getcwd(), texFileName + texFileAnsPostfix + "_PDF" + ".pdf"),
                 os.path.join(os.getcwd(), "answers", "pdf", texFileName + texFileAnsPostfix + "_PDF" + ".pdf")
             )
-
 
     def createTickets(self, n, html=False, startIndex=1, withTitle=False):
         self.__withTitle = withTitle
